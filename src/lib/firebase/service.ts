@@ -33,7 +33,7 @@ export async function signUp(
   userData: {
     email: string;
     password: string;
-    name: string;
+    username: string;
     fullName: string;
     phone: string;
     role?: string;
