@@ -1,5 +1,5 @@
 import {
-    addDoc,
+  addDoc,
   collection,
   doc,
   getDoc,
@@ -9,6 +9,7 @@ import {
   where,
 } from "firebase/firestore";
 import app from "./init";
+import bcrypt from "bcrypt";
 
 const fireStore = getFirestore(app);
 
@@ -42,7 +43,7 @@ export async function signUp(
   const q = query(
     collection(fireStore, "users"),
     where("email", "==", userData.email)
-  );
+  );    
 
   const querySnapshot = await getDocs(q);
   const data = querySnapshot.docs.map((doc) => ({
@@ -50,16 +51,19 @@ export async function signUp(
     ...doc.data(),
   }));
 
-  if(data.length > 0) {
+  if (data.length > 0) {
     callback(false);
-  }else{
+  } else {
+    if (!userData.role) userData.role = "member";
+
+    userData.password = await bcrypt.hash(userData.password, 10);
     await addDoc(collection(fireStore, "users"), userData)
-        .then(() => {
-          callback(true);
-        })
-        .catch((error) => {
-          callback(false);
-          console.log(error);          
-        });
+      .then(() => {
+        callback(true);
+      })
+      .catch((error) => {
+        callback(false);
+        console.log(error);
+      });
   }
 }
